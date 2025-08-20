@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Document Notebook</title>
+  <style>
+    :root{
+      --bg:#0b0f14; --panel:#121821; --muted:#8aa0b4; --text:#e6eef6; --accent:#6aa5ff; --accent-2:#9bffb0;
+      --danger:#ff6a6a; --border:#1f2a37; --shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0; font: 15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,"Helvetica Neue",Arial; background:linear-gradient(180deg,#0b0f14,#0a1018 60%,#0b0f14); color:var(--text)}
+    header{position:sticky; top:0; z-index:5; background:rgba(11,15,20,.7); backdrop-filter: blur(6px); border-bottom:1px solid var(--border)}
+    .wrap{max-width:1000px; margin:0 auto; padding:18px 18px}
+    .brand{display:flex; gap:12px; align-items:center}
+    .brand h1{margin:0; font-size:20px; letter-spacing:.3px}
+    .brand small{color:var(--muted)}
+    .toolbar{display:flex; gap:10px; margin-top:12px; flex-wrap:wrap}
+    button, .btn{appearance:none; border:1px solid var(--border); background:var(--panel); color:var(--text); padding:10px 14px; border-radius:12px; cursor:pointer; box-shadow: var(--shadow); transition:.2s transform, .2s opacity, .2s border-color}
+    button:hover{transform: translateY(-1px)}
+    .btn-accent{border-color:#2c4670; background:linear-gradient(180deg,#132132,#101a28); color:#e9f2ff}
+    .btn-danger{border-color:#5f2222; background:linear-gradient(180deg,#2a1515,#221212); color:#ffdede}
+    .grid{display:grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap:14px}
+    .card{background:linear-gradient(180deg,#121821,#0f141c); border:1px solid var(--border); padding:14px; border-radius:16px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:8px; min-height:110px}
+    .title{font-weight:600; font-size:16px}
+    .meta{color:var(--muted); font-size:12px}
+    .empty{opacity:.7; text-align:center; padding:40px; border:1px dashed var(--border); border-radius:16px}
+
+    dialog.modal{width:min(900px,92vw); border:none; padding:0; border-radius:18px; overflow:hidden; background:#0f141c; box-shadow: var(--shadow)}
+    .modal header{position:sticky; inset:0; background:#0d131b; border:none}
+    .modal .head{display:flex; gap:12px; align-items:center; justify-content:space-between}
+    .modal .head h2{margin:.4rem 0; font-size:20px}
+    .modal .content{padding:16px 18px 22px}
+    .modal .body{white-space:pre-wrap; font-size:16px; line-height:1.6}
+
+    .sheet{background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:14px; box-shadow:var(--shadow)}
+    .sheet h3{margin:0 0 10px 0}
+    label{display:block; font-size:12px; color:var(--muted); margin:10px 0 6px}
+    input[type="text"], textarea{width:100%; background:#0d131b; color:var(--text); border:1px solid var(--border); border-radius:12px; padding:12px; font:inherit}
+    textarea{min-height:160px; resize:vertical}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+
+    .spacer{flex:1}
+    .hidden{display:none !important}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="brand">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M4 7a3 3 0 0 1 3-3h3v4a3 3 0 0 1-3 3H3V7h1Zm6-3h7a3 3 0 0 1 3 3v4h-7a3 3 0 0 1-3-3V4Zm-7 8h7a3 3 0 0 1 3 3v5H7a3 3 0 0 1-3-3v-5Zm11 8v-5a3 3 0 0 1 3-3h3v5a3 3 0 0 1-3 3h-3Z" fill="url(#g)"/><defs><linearGradient id="g" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse"><stop stop-color="#6aa5ff"/><stop offset="1" stop-color="#9bffb0"/></linearGradient></defs></svg>
+        <h1>Document Notebook <small>— your simple, local-first docs</small></h1>
+      </div>
+      <div class="toolbar">
+        <button id="btn-new" class="btn btn-accent">➕ Add new</button>
+        <button id="btn-export" class="btn">⤓ Export</button>
+        <label class="btn" for="importer" title="Import from a previously exported file">⤒ Import<input id="importer" type="file" accept="application/json" class="hidden"></label>
+        <div class="spacer"></div>
+        <span class="meta" id="status">Saved</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section id="compose" class="sheet hidden" aria-label="Compose">
+      <h3 id="compose-title">New document</h3>
+      <label for="title">Title</label>
+      <input id="title" type="text" placeholder="e.g., My study plan" />
+      <label for="body">Body</label>
+      <textarea id="body" placeholder="Write your thoughts here…"></textarea>
+      <div class="row" style="margin-top:10px">
+        <button id="btn-save" class="btn btn-accent">💾 Save</button>
+        <button id="btn-cancel" class="btn">✖ Cancel</button>
+      </div>
+    </section>
+
+    <section style="margin:18px 0 8px; display:flex; align-items:center; gap:10px">
+      <h3 style="margin:0">Your documents</h3>
+      <div class="spacer"></div>
+      <input id="search" type="text" placeholder="Search titles…" style="max-width:280px; background:#0d131b; color:var(--text); border:1px solid var(--border); border-radius:10px; padding:9px 12px"/>
+    </section>
+
+    <div id="list" class="grid" aria-live="polite"></div>
+
+    <div id="empty" class="empty hidden">No documents yet. Click <b>Add new</b> to start ✨</div>
+  </main>
+
+  <dialog id="viewer" class="modal">
+    <header>
+      <div class="wrap head">
+        <h2 id="view-title"></h2>
+        <div class="row">
+          <button id="btn-edit" class="btn">✎ Edit</button>
+          <button id="btn-delete" class="btn btn-danger">🗑 Delete</button>
+          <button id="btn-close" class="btn">✕ Close</button>
+        </div>
+      </div>
+    </header>
+    <div class="content">
+      <div id="view-body" class="body"></div>
+    </div>
+  </dialog>
+
+  <script>
+    // ——— State & Storage ———
+    const STORAGE_KEY = 'docs.notebook.v1';
+    /** @type {{id:string,title:string,body:string,created:number,updated:number}[]} */
+    let docs = [];
+    let editingId = null;
+
+    const el = (sel) => document.querySelector(sel);
+    const els = (sel) => Array.from(document.querySelectorAll(sel));
+    const status = el('#status');
+
+    function load(){
+      try{ docs = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+      catch{ docs = [] }
+    }
+    function persist(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(docs));
+      flashSaved();
+    }
+    function flashSaved(){
+      status.textContent = 'Saved';
+      status.style.opacity = '1';
+      setTimeout(()=>{ status.style.opacity = '.7'; }, 800);
+    }
+
+    // ——— UI helpers ———
+    function showCompose(isEdit=false){
+      el('#compose').classList.remove('hidden');
+      el('#compose-title').textContent = isEdit? 'Edit document' : 'New document';
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+    function hideCompose(){
+      el('#compose').classList.add('hidden');
+      el('#title').value = '';
+      el('#body').value = '';
+      editingId = null;
+    }
+    function renderList(){
+      const q = el('#search').value.trim().toLowerCase();
+      const target = el('#list');
+      target.innerHTML = '';
+      const filtered = q? docs.filter(d => d.title.toLowerCase().includes(q)) : docs;
+      if(filtered.length === 0){ el('#empty').classList.remove('hidden'); }
+      else{ el('#empty').classList.add('hidden'); }
+      filtered.sort((a,b)=> b.updated - a.updated).forEach(doc => {
+        const card = document.createElement('article');
+        card.className = 'card';
+        const title = document.createElement('div');
+        title.className = 'title';
+        title.textContent = doc.title || '(Untitled)';
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        const dt = new Date(doc.updated || doc.created);
+        meta.textContent = 'Updated ' + dt.toLocaleString();
+        const open = document.createElement('button');
+        open.className = 'btn';
+        open.textContent = 'Open';
+        open.addEventListener('click', ()=> openViewer(doc.id));
+        // clicking the card opens too
+        card.addEventListener('click', (e)=>{ if(e.target===open) return; openViewer(doc.id); });
+        card.append(title, meta, open);
+        target.append(card);
+      })
+    }
+
+    // ——— CRUD ———
+    function saveDoc(){
+      const title = el('#title').value.trim();
+      const body = el('#body').value.trim();
+      if(!title && !body){ alert('Please enter a title or body.'); return; }
+      const now = Date.now();
+      if(editingId){
+        const idx = docs.findIndex(d=>d.id===editingId);
+        if(idx>-1){ docs[idx] = {...docs[idx], title, body, updated:now}; }
+      }else{
+        const id = crypto.randomUUID? crypto.randomUUID() : String(now) + Math.random().toString(36).slice(2,7);
+        docs.push({id, title, body, created:now, updated:now});
+      }
+      persist();
+      hideCompose();
+      renderList();
+    }
+
+    function openViewer(id){
+      const doc = docs.find(d=>d.id===id); if(!doc) return;
+      el('#view-title').textContent = doc.title || '(Untitled)';
+      const body = el('#view-body');
+      body.textContent = doc.body || '';
+      el('#viewer').showModal();
+      el('#btn-edit').onclick = ()=>{ startEdit(id); };
+      el('#btn-delete').onclick = ()=>{ confirmDelete(id); };
+    }
+
+    function startEdit(id){
+      const doc = docs.find(d=>d.id===id); if(!doc) return;
+      editingId = id;
+      el('#title').value = doc.title;
+      el('#body').value = doc.body;
+      showCompose(true);
+      el('#viewer').close();
+    }
+
+    function confirmDelete(id){
+      const doc = docs.find(d=>d.id===id); if(!doc) return;
+      if(confirm(`Delete \"${doc.title || 'Untitled'}\"? This cannot be undone.`)){
+        docs = docs.filter(d=>d.id!==id);
+        persist();
+        el('#viewer').close();
+        renderList();
+      }
+    }
+
+    // ——— Export / Import ———
+    function exportAll(){
+      const blob = new Blob([JSON.stringify({version:1, exported:Date.now(), docs}, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'document-notebook-export.json';
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    }
+    async function importAll(file){
+      if(!file) return;
+      try{
+        const text = await file.text();
+        const data = JSON.parse(text);
+        if(!data || !Array.isArray(data.docs)) throw new Error('Invalid file');
+        docs = data.docs;
+        persist();
+        renderList();
+      }catch(err){
+        alert('Import failed: ' + (err.message||err));
+      }
+    }
+
+    // ——— Wire up ———
+    function init(){
+      load();
+      renderList();
+      el('#btn-new').addEventListener('click', ()=>{ showCompose(false); el('#title').focus(); });
+      el('#btn-save').addEventListener('click', saveDoc);
+      el('#btn-cancel').addEventListener('click', hideCompose);
+      el('#btn-close').addEventListener('click', ()=> el('#viewer').close());
+      el('#btn-export').addEventListener('click', exportAll);
+      el('#importer').addEventListener('change', (e)=> importAll(e.target.files?.[0]));
+      el('#search').addEventListener('input', renderList);
+      ['title','body'].forEach(id=> el('#'+id).addEventListener('input', ()=>{ status.textContent='Editing…'; }));
+      window.addEventListener('keydown', (e)=>{
+        if(e.key==='Escape'){
+          const v = el('#viewer'); if(v.open) v.close(); else hideCompose();
+        }
+        if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){
+          if(!el('#compose').classList.contains('hidden')){ e.preventDefault(); saveDoc(); }
+        }
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
