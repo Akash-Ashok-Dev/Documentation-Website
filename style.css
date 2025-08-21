@@ -1,48 +1,48 @@
-body {
-  font-family: Arial, sans-serif;
-  background: #fafafa;
-  margin: 0;
-  padding: 20px;
+:root{
+  --bg:#0b0f14; --panel:#121821; --muted:#8aa0b4; --text:#e6eef6; --accent:#6aa5ff; --accent-2:#9bffb0;
+  --danger:#ff6a6a; --border:#1f2a37; --shadow: 0 10px 30px rgba(0,0,0,.35);
 }
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0; font: 15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,"Helvetica Neue",Arial; background:linear-gradient(180deg,#0b0f14,#0a1018 60%,#0b0f14); color:var(--text)}
 
-#app {
-  max-width: 600px;
-  margin: auto;
-}
+header{position:sticky; top:0; z-index:5; background:rgba(11,15,20,.7); backdrop-filter: blur(6px); border-bottom:1px solid var(--border)}
+.wrap{max-width:1000px; margin:0 auto; padding:18px 18px}
+.brand{display:flex; gap:12px; align-items:center}
+.brand h1{margin:0; font-size:20px; letter-spacing:.3px}
+.brand small{color:var(--muted)}
+.toolbar{display:flex; gap:10px; margin-top:12px; flex-wrap:wrap}
 
-button {
-  margin: 5px;
-  padding: 10px 15px;
-  border: none;
-  border-radius: 6px;
-  background: #4a90e2;
-  color: white;
-  cursor: pointer;
+button, .btn{
+  appearance:none; border:1px solid var(--border); background:var(--panel); color:var(--text); 
+  padding:10px 14px; border-radius:12px; cursor:pointer; box-shadow: var(--shadow); 
+  transition:.2s transform, .2s opacity, .2s border-color
 }
+button:hover{transform: translateY(-1px)}
+.btn-accent{border-color:#2c4670; background:linear-gradient(180deg,#132132,#101a28); color:#e9f2ff}
+.btn-danger{border-color:#5f2222; background:linear-gradient(180deg,#2a1515,#221212); color:#ffdede}
 
-button:hover {
-  background: #357ab8;
-}
+.grid{display:grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap:14px}
+.card{background:linear-gradient(180deg,#121821,#0f141c); border:1px solid var(--border); padding:14px; border-radius:16px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:8px; min-height:110px}
+.title{font-weight:600; font-size:16px}
+.meta{color:var(--muted); font-size:12px}
+.empty{opacity:.7; text-align:center; padding:40px; border:1px dashed var(--border); border-radius:16px}
 
-#docsList div {
-  padding: 10px;
-  margin: 8px 0;
-  background: white;
-  border: 1px solid #ddd;
-  cursor: pointer;
-}
+dialog.modal{width:min(900px,92vw); border:none; padding:0; border-radius:18px; overflow:hidden; background:#0f141c; box-shadow: var(--shadow)}
+.modal header{position:sticky; inset:0; background:#0d131b; border:none}
+.modal .head{display:flex; gap:12px; align-items:center; justify-content:space-between}
+.modal .head h2{margin:.4rem 0; font-size:20px}
+.modal .content{padding:16px 18px 22px}
+.modal .body{white-space:pre-wrap; font-size:16px; line-height:1.6}
 
-.hidden {
-  display: none;
+.sheet{background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:14px; box-shadow:var(--shadow)}
+.sheet h3{margin:0 0 10px 0}
+label{display:block; font-size:12px; color:var(--muted); margin:10px 0 6px}
+input[type="text"], textarea{
+  width:100%; background:#0d131b; color:var(--text); border:1px solid var(--border); border-radius:12px; padding:12px; font:inherit
 }
+textarea{min-height:160px; resize:vertical}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
 
-#viewer, #editor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: white;
-  padding: 20px;
-  overflow: auto;
-}
+.spacer{flex:1}
+.hidden{display:none !important}
